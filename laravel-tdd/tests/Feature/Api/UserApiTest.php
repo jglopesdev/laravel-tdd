@@ -120,7 +120,9 @@ class UserApiTest extends TestCase
 
     public function test_not_found()
     {
-        $response = $this->getJson("{$this->endpoint}/fake_value");
+        $response = $this->getJson("{$this->endpoint}/fake_value", [
+            'name' => 'João Gabriel'
+        ]);
         $response->assertStatus(Response::HTTP_NOT_FOUND);
     }
 
@@ -166,5 +168,19 @@ class UserApiTest extends TestCase
                     'statusCode' => Response::HTTP_UNPROCESSABLE_ENTITY
                 ]    
         ];
+     }
+
+     public function test_delete_not_found()
+     {
+        $response = $this->deleteJson("{$this->endpoint}/fake_value");
+        $response->assertStatus(Response::HTTP_NOT_FOUND);
+     }
+
+     public function test_delete()
+     {
+        $user = User::factory()->create();
+
+        $response = $this->deleteJson("{$this->endpoint}/{$user->email}");
+        $response->assertNoContent();
      }
 }
