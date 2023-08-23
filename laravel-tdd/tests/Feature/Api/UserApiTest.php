@@ -56,33 +56,50 @@ class UserApiTest extends TestCase
         ];
     }
 
-    public function test_create()
-    {
-        $payload = [
-            'name' => 'João Gabriel',
-            'email' => 'contato@jglopes.dev',
-            'password' => '12345678',
-        ];
+    /**
+     * @dataProvider dataProviderCreateUser
+     */
+
+    public function test_create(
+        array $payload,
+        int $statusCode,
+        array $structureResponse,
+    ) {
 
         $response = $this->postJson($this->endpoint, $payload);
-        $response->assertCreated();
-        $response->assertJsonStructure([
-            'data' => [
-                'id',
-                'name',
-                'email'
+        //$response->assertCreated();
+        $response->assertStatus($statusCode);
+        $response->assertJsonStructure($structureResponse);
+      }
+
+    public function dataProviderCreateUser(): array{
+        
+        return [
+            'test created' => [
+                'payload' => [
+                    'name' => 'João Gabriel',
+                    'email' => 'contato@jglopes.dev',
+                    'password' => '12345678',
+                 ],
+                'statusCode' => Response::HTTP_CREATED,
+                'structureResponse' => [
+                    'data' => [
+                        'id',
+                        'name',
+                        'email'
+                    ]
+                ]
+
+            ],
+            'test validation' => [
+                'payload' => [],
+                'statusCode' => Response::HTTP_UNPROCESSABLE_ENTITY,
+                'structureResponse' => [
+                    'errors' => [
+                        'name'
+                    ]
+                ]
             ]
-        ]);
-    }
-
-    public function test_create_validations()
-    {
-        $payload = [
-            'email' => 'contato@jglopes.dev',
-            'password' => '12345678',
         ];
-
-        $response = $this->postJson($this->endpoint, $payload);
-        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 }
