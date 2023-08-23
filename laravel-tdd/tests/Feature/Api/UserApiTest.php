@@ -124,28 +124,47 @@ class UserApiTest extends TestCase
         $response->assertStatus(Response::HTTP_NOT_FOUND);
     }
 
-    public function test_update()
+    /**
+     * @dataProvider providerUserUpdate
+     */
+
+    public function test_update(array $payload, int $statusCode)
     {
         $user = User::factory()->create();
 
-        $payload = [
-            'name' =>'Name Updated',
-            'password' => 'new_password'
-        ];
-
         $response = $this->putJson("{$this->endpoint}/{$user->email}", $payload);
-        $response->assertStatus(Response::HTTP_OK);
+        $response->assertStatus($statusCode);
     }
 
-    public function test_update_validations()
-    {
-        $user = User::factory()->create();
+     public function providerUserUpdate(): array
+     {
+        return [
+                'test update ok' =>
+                ['payload' => [
+                                'name' => 'João Gabriel',
+                                'password' => '12345678'
+                              ],
+                 'statusCode' => Response::HTTP_OK
+                ],
 
-        $payload = [
-            'password' => 'new_password'
+                'test update without password' =>
+                ['payload' => [
+                                'name' => 'João Gabriel',
+                              ],
+                 'statusCode' => Response::HTTP_OK
+                ],
+                
+                'test update without name' =>
+                ['payload' => [
+                                'password' => '12345678'
+                              ],
+                'statusCode' => Response::HTTP_UNPROCESSABLE_ENTITY
+                ],
+
+                'test update without name' => [
+                    'payload' => [],
+                    'statusCode' => Response::HTTP_UNPROCESSABLE_ENTITY
+                ]    
         ];
-
-        $response = $this->putJson("{$this->endpoint}/{$user->email}", $payload);
-        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
-    }
+     }
 }
