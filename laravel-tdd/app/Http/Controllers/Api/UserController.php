@@ -40,4 +40,10 @@ class UserController extends Controller
 
         return new UserResource($user);
     }
+
+    public function show($email)
+    {
+        $user = $this->repository->find($email);
+        return new UserResource($user);
+    }
 }
