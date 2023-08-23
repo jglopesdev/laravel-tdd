@@ -15,20 +15,44 @@ class UserApiTest extends TestCase
     public function test_paginate_empty()
     {
         $response = $this->getJson($this->endpoint);
-        $response->assertStatus(Response::HTTP_OK);
+        
+        // $response->assertStatus(Response::HTTP_OK);
+        $response->assertOk();
         $response->assertJsonCount(0, 'data');
+        $response->assertJsonStructure([
+            'meta' => [
+                'total',
+                'current_page',
+                'last_page',
+                'first_page',
+                'per_page'
+            ],
+            'data' 
+        ]);
+        $response->assertJsonFragment([
+            'total' => 0
+        ]);
     }
 
     public function test_paginate()
     {
-
         User::factory()->count(40)->create();
 
         $response = $this->getJson($this->endpoint);
 
-        $response->assertStatus(Response::HTTP_OK);
+        $response->assertOk();
         $response->assertJsonCount(15, 'data');
-
+        $response->assertJsonStructure([
+            'meta' => [
+                'total',
+                'current_page',
+                'last_page',
+                'first_page',
+                'per_page'
+            ]
+        ]);
+        $response->assertJsonFragment(['total' => 40]);
+        $response->assertJsonFragment(['current_page' => 1]);
     }
 
     public function test_page_two()
@@ -41,5 +65,7 @@ class UserApiTest extends TestCase
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonCount(5, 'data');
 
+        $response->assertJsonFragment(['total' => 20]);
+        $response->assertJsonFragment(['current_page' => 2]);
     }
 }
